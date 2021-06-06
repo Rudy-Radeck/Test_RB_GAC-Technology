@@ -25,17 +25,28 @@
             </div>
         </header>
 
-        <main class="mt-5 d-flex flex-column">
+        <main class="mt-5">
 
-            <div class="mx-auto my-2">
-                <span>Envoyer le fichier csv dans la base de données</span>
-                <button id="buttonInsert" class="btn btn-primary mx-auto"> Cliquez Ici </button>
+            <div class="d-inline-flex flex-row align-items-center w-100 mx-auto my-2">
+                <div class="col-8 d-flex flex-row align-items-center justify-content-end">
+                    <span class="">Envoyer le fichier csv dans la base de données</span>
+                    <button id="buttonInsert" class="btn btn-primary mx-1"> Cliquez Ici </button>
+                </div>
+                <div class="col-4 d-flex flex-row align-items-center justify-content-start">
+                    <img id="CheckBddImg" src="img/novalide.png" class="img-fluid mx-2" alt="bddCheck">
+                    <span id="CheckBddTxt"><!--Injected by AJAX--></span>
+                </div>
             </div>
+
             <div class="mx-auto my-2">
                 <span>Supprimer les données de la base de données</span>
                 <button id="buttonDelete" class="btn btn-primary mx-auto"> Cliquez Ici </button>
             </div>
+
+
             <p>_______________________________________________________________</p>
+
+
             <div class="mx-auto my-2">
                 <span>Retrouver la durée totale réelle des appels effectués après le 15/02/2012 (inclus)</span>
                 <button id="buttonCallAfterDate" class="btn btn-primary mx-auto">Cliquez Ici</button>
@@ -63,10 +74,12 @@
                 <!--Injected by AJAX-->
             </div>
 
+
         </main>
 
     </div>
 
+    <!-- JQuery -->
     <script
             src="https://code.jquery.com/jquery-3.6.0.min.js"
             integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="

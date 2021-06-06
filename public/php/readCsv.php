@@ -7,11 +7,9 @@ class ReadCsv
 
     /**
      * Méthode pour transformer un fichier csv en un tableau
-     * Prend en paramètre le chemin du fichier, et le nombre de lignes au debut inutile à supprimer (laisser les en-têtes des colonnes pour le mapping)
-     * @param $csvPath
-     * @param $headerSliceLength
+     * @param $csvPath string Chemin du fichier
+     * @param $headerSliceLength integer Nombre de lignes au début inutiles à supprimer (laisser les en-têtes des colonnes pour le mapping)
      * @return array
-     *
      */
     public static function CsvToArray($csvPath, $headerSliceLength)
     {
@@ -46,17 +44,42 @@ class ReadCsv
         foreach($rows as $row) {
             $csv[] = array_combine($header, $row);
         }
+
+        //Vérification du format du csv
+        if ($header[0] != "Compte facturé"
+            || $header[1] != "N° Facture"
+            || $header[2] != "N° abonné"
+            || $header[3] != "Date"
+            || $header[4] != "Heure"
+            || $header[5] != "Durée/volume réel"
+            || $header[6] != "Durée/volume facturé"
+            || $header[7] != "Type")
+        {
+            //format invalide
+            $csv = false;
+        }
         return $csv;
     }
 
-    // Méthode de vérification de l'existence du fichier sur le chemin indiqué
+
+    /**
+     * Méthode de vérification de l'existence du fichier sur le chemin indiqué
+     * @param $csvPath string Chemin du fichier
+     * @return bool
+     */
     private static function PathVerification($csvPath)
     {
         file_exists($csvPath)? $fileExiste = true : $fileExiste = false;
         return $fileExiste;
     }
 
-    // Méthode de préparation du csv pour le mapping, suppression des lignes d'en-tête inutile
+
+    /**
+     * Méthode de préparation du csv pour le mapping, suppression des lignes d'en-tête inutile
+     * @param $csvPath string Chemin du fichier
+     * @param $headerSliceLength integer Nombre de lignes au début inutiles à supprimer (laisser les en-têtes des colonnes pour le mapping)
+     * @return array|false
+     */
     private static function CsvPrepare($csvPath, $headerSliceLength)
     {
         $file = file($csvPath);

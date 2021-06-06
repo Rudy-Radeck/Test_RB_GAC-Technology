@@ -4,7 +4,7 @@ class Database
 {
 
     // Paramètres de la base de données
-    private static $_db = "tickets_appels_bdd";
+    private static $_db = "rb_test_gac-technology";
     private static $_dbHost="localhost";
     private static $_dbUser="User_GAC_test";
     private static $_dbPasswd="GAC_test2021";
@@ -12,13 +12,21 @@ class Database
 
     private static $_pdo;
 
-    // Connection à la base de données
+
+    /**
+     * Connection à la base de données.
+     */
     public static function connect()
     {
             self::$_pdo = new PDO('mysql:host='.self::$_dbHost.';dbname='.self::$_db.'', self::$_dbUser, self::$_dbPasswd, self::$_pdoAttributes);
     }
 
-    // Préparation et envoi d'un tableau (représentant un fichier csv) en base de données
+    /**
+     * Préparation et envoi d'un tableau (représentant un fichier csv) en base de données.
+     * @param array $csv Tableau créé à partir d'un fichier csv.
+     * @param int $addHeaderLine Ligne à ajouter pour un retour visuel correct par rapport au fichier csv (le nombre de lignes d'en-tête supprimées à la creation du tableau $csv).
+     * @return array Retour des potentielles anomalies détectées lors de l'analyse du tableau csv.
+     */
     public static function InsertCsvArrayToDataBase(array $csv, $addHeaderLine = 0)
     {
         try {
@@ -44,27 +52,27 @@ class Database
                     // Ajoute un champ vide au champ non nullable et récuperation des anomalies (champ vide censé être rempli)
                     if ($key == 'Compte facturé' && $value == null){
                         $row[$key] = '';
-                        $errorListe[] = ["Potentielle erreur ligne: " . $line . " colonne: " . $key];
+                        $errorListe[] = ["Potentielle erreur ligne : " . $line . " colonne : " . $key];
                     }
                     if ($key == 'N° Facture' && $value == null){
                         $row[$key] = '';
-                        $errorListe[] = ["Potentielle erreur ligne: " . $line . " colonne: " . $key];
+                        $errorListe[] = ["Potentielle erreur ligne : " . $line . " colonne : " . $key];
                     }
                     if ($key == 'N° abonné' && $value == null){
                         $row[$key] = '';
-                        $errorListe[] = ["Potentielle erreur ligne: " . $line . " colonne: " . $key];
+                        $errorListe[] = ["Potentielle erreur ligne : " . $line . " colonne : " . $key];
                     }
                     if ($key == 'Date' && $value == null){
                         $row[$key] = '';
-                        $errorListe[] = ["Potentielle erreur ligne: " . $line . " colonne: " . $key];
+                        $errorListe[] = ["Potentielle erreur ligne : " . $line . " colonne : " . $key];
                     }
                     if ($key == 'Heure' && $value == null){
                         $row[$key] = '';
-                        $errorListe[] = ["Potentielle erreur ligne: " . $line . " colonne: " . $key];
+                        $errorListe[] = ["Potentielle erreur ligne : " . $line . " colonne : " . $key];
                     }
                     if ($key == 'Type' && $value == null){
                         $row[$key] = '';
-                        $errorListe[] = ["Potentielle erreur ligne: " . $line . " colonne: " . $key];
+                        $errorListe[] = ["Potentielle erreur ligne : " . $line . " colonne : " . $key];
                     }
                 }
 
@@ -117,7 +125,9 @@ class Database
         return $errorListe;
     }
 
-    // Suprime les données de la Bdd et remet l'auto incrémentation de l'Id à 1
+    /**
+     * Suprime les données de la Bdd et remet l'auto incrémentation de l'Id à 1.
+     */
     public static function DeleteAllDataInDataBase(){
         $pdo = self::$_pdo;
         $stmt = $pdo->prepare("DELETE FROM `détail des appels bdd`");
@@ -127,7 +137,13 @@ class Database
 
     }
 
-    // Retrouver la durée totale réelle des appels effectués après le 15/02/2012 (inclus)
+    //
+
+    /**
+     * Retrouver la durée totale réelle des appels effectués après le "$date" (inclus).
+     * @param $date
+     * @return array
+     */
     public static function CallAfterThisDate($date){
         $pdo = self::$_pdo;
         $stmt = $pdo->prepare("SELECT `durée` FROM `détail des appels bdd` WHERE `date` >= '$date' AND `durée` IS NOT NULL ");
@@ -157,7 +173,10 @@ class Database
     }
 
 
-    // Retrouver le TOP 10 des volumes data facturés en dehors de la tranche horaire 8h00-18h00 pour l'ensemble.
+    /**
+     * Retrouver le TOP 10 des volumes data facturés en dehors de la tranche horaire 8h00-18h00 pour l'ensemble.
+     * @return mixed
+     */
     public static function DataBilledBetweenTwoHours(){
         $pdo = self::$_pdo;
         $stmt = $pdo->prepare("SELECT * FROM `détail des appels bdd` WHERE `heure` BETWEEN '00:00:00' AND '08:00:00' OR `heure` BETWEEN '18:00:00' AND '23:59:59' ORDER BY `volume_facture` DESC LIMIT 10");
@@ -166,7 +185,11 @@ class Database
         return $selectedData;
     }
 
-    // Retrouver le TOP 10 des volumes data facturés en dehors de la tranche horaire 8h00-18h00, par abonné.
+    /**
+     * Retrouver le TOP 10 des volumes data facturés en dehors de la tranche horaire 8h00-18h00, par abonné.
+     * @param $numSubscriber mixed Numéro d'abonné
+     * @return mixed
+     */
     public static function DataBilledBetweenTwoHoursBySubscriber($numSubscriber){
         $pdo = self::$_pdo;
         $stmt = $pdo->prepare("SELECT * FROM `détail des appels bdd` WHERE `num_abonne` = '$numSubscriber' AND `heure` BETWEEN '00:00:00' AND '08:00:00' OR `num_abonne` = '$numSubscriber' AND `heure` BETWEEN '18:00:00' AND '23:59:59' ORDER BY `volume_facture` DESC LIMIT 10");
@@ -176,13 +199,28 @@ class Database
     }
 
 
-    // Retrouver la quantité totale de SMS envoyés par l'ensemble des abonnés
+    /**
+     * Retrouver la quantité totale de SMS envoyés par l'ensemble des abonnés.
+     * @return mixed
+     */
     public static function TotalSms(){
         $pdo = self::$_pdo;
         $stmt = $pdo->prepare("SELECT count(*) FROM `détail des appels bdd` WHERE `type` LIKE '%sms%'");
         $stmt->execute();
         $selectedData = $stmt->fetch();
         return $selectedData['count(*)'];
+    }
+
+    /**
+     * Détermine si la base de données est vide ou si des données sont déjà présentes.
+     * @return mixed
+     */
+    public static function IsEmptyDatabase(){
+        $pdo = self::$_pdo;
+        $stmt = $pdo->prepare("SELECT count(`id`) FROM `détail des appels bdd`");
+        $stmt->execute();
+        $selectedData = $stmt->fetch();
+        return $selectedData['count(`id`)'];
     }
 
 }

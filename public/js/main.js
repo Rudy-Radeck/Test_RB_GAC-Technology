@@ -1,7 +1,9 @@
 
 
-
+// Récupération de la div où vont être injectées les informations
 let view = $('#executionView')
+
+// Fonction d'affichage du spinner de chargement
 function loading(){
     view.empty()
     view.append(
@@ -12,8 +14,41 @@ function loading(){
     )
 }
 
-$(document).ready(function(){
+// Fonction pour vérifier la base de données et voir si elle est vide ou non
+function IsEmptyDataBase(){
+    let checkBddImg = $("#CheckBddImg")
+    let checkBddTxt = $("#CheckBddTxt")
+    let btnInsert = $("#buttonInsert")
 
+    $.ajax({
+        type:'POST',
+        url: "../php/mainController.php",
+        data:{
+            ajaxPost : 'CheckDatabase'
+        },
+        success: function (data) {
+            data = JSON.parse(data)
+            if (data > 0){
+                checkBddImg.attr('src', 'img/valide.png')
+                checkBddTxt.empty()
+                checkBddTxt.append(data+' Entrée(s) prénsente(s) en BDD')
+                btnInsert.attr('disabled', 'disabled')
+            }else {
+                checkBddImg.attr('src', 'img/novalide.png')
+                checkBddTxt.empty()
+                checkBddTxt.append('Aucune entrée présente en BDD')
+                btnInsert.removeAttr('disabled')
+            }
+        },
+        error: function (){
+            alert("Erreur lors de l'exécution")
+        }
+    })
+}
+
+// Ajax pour l'envoi du csv en Bdd
+$(document).ready(function(){
+    IsEmptyDataBase()
     $('#buttonInsert').click(function(e) {
         e.preventDefault();
         loading();
@@ -24,21 +59,27 @@ $(document).ready(function(){
                 ajaxPost : 'Insert'
             },
             success: function (data) {
-                console.log(data)
                 data = JSON.parse(data)
-
-                view.empty()
-                view.append(
-                    "<h3>Fichier csv importé en base de données avec succès !</h3><br>"
-                )
-                if (data != null && data !== ''){
+                if (data !== false && data !== ''){
+                    view.empty()
                     view.append(
-                        "<p>Anomalie détectée dans le fichier cvs </p>"
+                        "<h3>Fichier csv importé en base de données avec succès !</h3><br>"
                     )
-                }
-                for (let i=0; i<=data.length-1;i++){
+                    if (data !== false && data !== ''){
+                        view.append(
+                            "<p>Anomalie détectée dans le fichier cvs </p>"
+                        )
+                    }
+                    for (let i=0; i<=data.length-1;i++){
+                        view.append(
+                            "<p>"+data[i]+"</p>"
+                        )
+                    }
+                    IsEmptyDataBase()
+                }else{
+                    view.empty()
                     view.append(
-                        "<p>"+data[i]+"</p>"
+                        "<h3>Une erreur s'est produite, vérifier votre ficher csv!</h3><br>"
                     )
                 }
             },
@@ -48,6 +89,7 @@ $(document).ready(function(){
         })
     });
 
+    // Ajax pour la suppression des données en Bdd
     $('#buttonDelete').click(function(e) {
         e.preventDefault();
         loading();
@@ -57,11 +99,12 @@ $(document).ready(function(){
             data:{
                 ajaxPost : 'Delete'
             },
-            success: function (data) {
+            success: function () {
                 view.empty()
                 view.append(
-                    "<p>Base de données vidé avec succès !</p>"
+                    "<p>Base de données vidée avec succès !</p>"
                 )
+                IsEmptyDataBase()
             },
             error: function (){
                 alert("Erreur lors de la suppression des données")
@@ -69,6 +112,7 @@ $(document).ready(function(){
         })
     });
 
+    // Ajax pour retrouver la durée totale réelle des appels effectués après le 15/02/2012 (inclus)
     $('#buttonCallAfterDate').click(function(e) {
         e.preventDefault();
         loading();
@@ -88,7 +132,7 @@ $(document).ready(function(){
                 }else{
                     view.empty()
                     view.append(
-                        "<p>durée totale réelle des appels effectués après le 15/02/2012 (inclus): "+data['hours']+" Heures ,"+data['minutes']+" Minutes ,"+data['seconds']+" Secondes"+"</p>"
+                        "<p>Durée totale réelle des appels effectués après le 15/02/2012 (inclus) : "+data['hours']+" heures, "+data['minutes']+" minutes, "+data['seconds']+" secondes"+"</p>"
                     )
                 }
             },
@@ -98,6 +142,7 @@ $(document).ready(function(){
         })
     });
 
+    // Ajax pour retrouver le TOP 10 des volumes data facturés en dehors de la tranche horaire 8h00-18h00
     $('#buttonDataBilledBetweenTwoHours').click(function(e) {
         e.preventDefault();
         loading();
@@ -109,7 +154,6 @@ $(document).ready(function(){
             },
             success: function (data) {
                 data =JSON.parse(data)
-                console.log(data)
                 if (data.length > 0){
                     view.empty()
                     view.append(
@@ -156,7 +200,7 @@ $(document).ready(function(){
         })
     });
 
-
+    // Ajax pour retrouver le TOP 10 des volumes data facturés en dehors de la tranche horaire 8h00-18h00, ==> par abonné <==.
     $('#buttonDataBilledBetweenTwoHoursBySubscribe').click(function(e) {
         let subNum = $('#inputSub').val()
         e.preventDefault();
@@ -170,7 +214,6 @@ $(document).ready(function(){
             },
             success: function (data) {
                 data =JSON.parse(data)
-                console.log(data)
                 if (data.length > 0){
                     view.empty()
                     view.append(
@@ -217,6 +260,7 @@ $(document).ready(function(){
         })
     });
 
+    // Ajax pour retrouver la quantité totale de SMS envoyés par l'ensemble des abonnés
     $('#buttonTotalSms').click(function(e) {
         e.preventDefault();
         loading();
@@ -228,11 +272,10 @@ $(document).ready(function(){
             },
             success: function (data) {
                 data = JSON.parse(data)
-                console.log(data)
                 if (data>0){
                     view.empty()
                     view.append(
-                        "<p>Quantité totale de SMS envoyés par l'ensemble des abonnés: "+data+" sms </p>"
+                        "<p>Quantité totale de SMS envoyés par l'ensemble des abonnés : "+data+" sms </p>"
                     )
                 }else {
                     view.empty()
